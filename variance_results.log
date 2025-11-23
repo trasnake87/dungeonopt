@@ -1,0 +1,39 @@
+(node:2723858) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/thomasrasnake/dung/test-variance-simple.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/thomasrasnake/dung/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+======================================================================
+RNG VARIANCE TEST
+======================================================================
+Testing current allocation 10 times with 100,000 battles each
+
+Run 1/10: 0.000% win rate (0.5s)
+Run 2/10: 0.000% win rate (0.5s)
+Run 3/10: 0.000% win rate (0.5s)
+Run 4/10: 0.000% win rate (0.5s)
+Run 5/10: 0.000% win rate (0.5s)
+Run 6/10: 0.000% win rate (0.5s)
+Run 7/10: 0.000% win rate (0.5s)
+Run 8/10: 0.000% win rate (0.5s)
+Run 9/10: 0.000% win rate (0.5s)
+Run 10/10: 0.000% win rate (0.5s)
+
+======================================================================
+STATISTICS
+======================================================================
+Mean:     0.000%
+Std Dev:  0.000%
+Min:      0.000%
+Max:      0.000%
+Range:    0.000%
+CV:       NaN%
+
+All values:
+0.000%, 0.000%, 0.000%, 0.000%, 0.000%, 0.000%, 0.000%, 0.000%, 0.000%, 0.000%
+
+======================================================================
+INTERPRETATION
+======================================================================
+If we're comparing two allocations, we'd want the difference to be
+at least 0.000% (2x std dev) to be confident it's real.
+======================================================================

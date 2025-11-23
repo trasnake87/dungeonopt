@@ -81,9 +81,16 @@ Gold cost follows triangular numbers: `(n × (n+1) / 2) × 10,000`
 
 ## Files
 
-- `optimizer3.js` - Main optimizer with all features
-- `optimizer2.js` - Optimizer without free gold investment feature
-- `optimizer.js` - Original optimizer
+- `optimizer3.js` - **Recommended** - Full optimizer with free gold investment feature
+  - Asks if you have free gold to invest before optimization
+  - Shows ranked recommendations for where to spend new gold
+  - Includes adaptive test counts and residual gold spending
+
+- `optimizer2.js` - Optimizer without free gold investment
+  - Use this for continuous background optimization
+  - Same adaptive test counts and residual gold spending
+  - Doesn't prompt for input, just runs
+
 - `dung/` - Battle simulation engine (by anfneub)
 
 ## Credits
