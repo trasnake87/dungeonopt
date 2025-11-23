@@ -24,10 +24,26 @@ The optimizer runs millions of battle simulations per test to find statistically
 
 - Node.js 18+
 - `node-fetch` package
+- **8 CPU cores** (default) - can be lowered for systems with fewer cores
 
 ```bash
 npm install node-fetch
 ```
+
+### Adjusting Worker Threads
+
+The optimizer uses 8 parallel worker threads by default. If your system has fewer cores, edit this line in the optimizer file:
+
+```javascript
+const NUM_WORKERS = 8;  // Change to match your CPU cores
+```
+
+Recommended settings:
+- 8+ cores: `NUM_WORKERS = 8`
+- 4 cores: `NUM_WORKERS = 4`
+- 2 cores: `NUM_WORKERS = 2`
+
+More workers = faster simulation, but using more workers than CPU cores will slow things down.
 
 ## Configuration
 
