@@ -1,0 +1,170 @@
+{
+  "page_title": "Queslar 重制版地下城模拟器",
+  "header": "Queslar 重制版地下城模拟器 <span style=\"color: #ff4444; font-size: 0.6em; vertical-align: super;\">测试版</span>",
+  "bench": "替补",
+  "bench_description": "在替补席和战斗槽之间拖拽佣兵",
+  "add_fighter": "+ 添加佣兵",
+  "dungeon_level": "地下城等级",
+  "number_of_battles": "战斗次数<span class=\"info-icon\" tabindex=\"0\" data-tooltip=\"详细模式只在战斗次数为1时生效\"></span>",
+  "verbose": "详细",
+  "api_key": "API 秘钥\n <span class=\"info-icon\" tabindex=\"0\" data-tooltip=\"你可以在 设置 > API 里找到你的秘钥\"></span>",
+  "api_key_placeholder": "输入您的 Queslar API 密钥",
+  "import_button": "导入",
+  "battle_formation": "战斗阵型",
+  "battle_formation_description": "点击编辑 • 拖拽移动/交换",
+  "fight_button": "⚔️ 战斗",
+  "clear_output_button": "清空输出",
+  "output": "输出",
+  "made_by": "由 anfneub 制作， SakakiChizuru 中文化",
+  "last_updated": "最后更新: 2025-10-08",
+  "changelog": "更新日志",
+  "referral_text": "如果您还没有使用过邀请码，请考虑使用anfnueb的",
+  "referral_link": "推荐链接",
+  "edit_fighter": "编辑佣兵",
+  "close_button": "关闭",
+  "class_label": "职业",
+  "name_label": "名称",
+  "fighter_name_placeholder": "佣兵名称",
+  "fighter_health": "佣兵生命值",
+  "fighter_damage": "佣兵伤害",
+  "fighter_hit": "佣兵命中",
+  "fighter_dodge": "佣兵闪避",
+  "fighter_defense": "佣兵防御",
+  "fighter_crit": "佣兵暴击",
+  "item_health": "物品生命值",
+  "item_damage": "物品伤害",
+  "item_hit": "物品命中",
+  "item_dodge": "物品闪避",
+  "item_defense": "物品防御",
+  "item_crit": "装备暴击 (%)",
+  "save_button": "保存",
+  "confirm_import": "确认导入",
+  "import_warning": "这将覆盖当前战斗阵型中的所有佣兵。您确定要继续吗？",
+  "dont_show_warning": "不再显示此警告",
+  "cancel_button": "取消",
+  "ok_button": "确定",
+  "language_en": "英文",
+  "language_cn": "中文",
+
+  "Below All For App.js [This line using as Comment]": "Below All For App.js [This line using as Comment]",
+
+  "class_descriptions": {
+    "assassin": "刺客优先攻击后排",
+    "brawler": "格斗家有15%的几率攻击两次",
+    "hunter": "猎人攻击一整排，对每个敌人造成75%的伤害",
+    "mage": "法师攻击一整列，对每个敌人造成50%的伤害",
+    "priest": "牧师存活时，每回合有10%的几率复活一个随机死亡的队友",
+    "shadow_dancer": "暗影舞者有25%的几率完全闪避一次攻击。闪避后，下一次攻击造成200%的伤害",
+    "berserker": "狂战士每损失25%的生命值，获得25%的伤害加成。当生命值低于25%时，狂战士的攻击无法被闪避",
+    "paladin": "圣骑士为同一列的所有盟友提供15%的伤害减免光环",
+    "crusader": "十字军随着队友的死亡而变得更强大。每个死亡的队友提供20%的全属性加成",
+    "sentinel": "卫士保护受伤的队友，拦截所有对生命值低于25%的队友的攻击",
+    "bastion": "与堡垒相邻的盟友获得50%的闪避几率和25%的伤害减免",
+    "no_class": "无特殊能力"
+  },
+
+  "FighterName": {
+    "ASSASSIN": "刺客",
+    "BRAWLER": "格斗家",
+    "HUNTER": "猎人",
+    "MAGE": "法师",
+    "PRIEST": "牧师",
+    "SHADOW_DANCER": "暗影舞者",
+    "SHADOWDANCER": "暗影舞者",
+    "BERSERKER": "狂战士",
+    "PALADIN": "圣骑士",
+    "CRUSADER": "十字军",
+    "SENTINEL": "卫士",
+    "BASTION": "堡垒",
+    "NONE": "无职业",
+    "EMPTY": "空",
+    "NO_CLASS": "无职业"
+  },
+
+  "UIElement": {
+    "ADD": "添加",
+    "DELETE": "删除",
+    "DUPLICATE": "复制",
+
+    "DUPLICATE_NAME": "{0}的复制",
+
+    "DROP_FIGHTER_HERE": "将佣兵拖动至此处",
+
+    "TOTAL_WONS": "佣兵在{1}场战斗中总共赢了{0}场.",
+
+    "VICTORY_CHANCE": "胜利几率: {0}%",
+    "AVG_SURVIVOR_HEALTH": "平均幸存怪物总血量: {0}",
+    "CHANCE_60_MIN": "60分钟内获胜几率: {0}%",
+
+    "IMPORTING": "导入中..."
+  },
+
+  "ConsoleMessages": {
+    "SUCC_IMPORT_FIGHTER": "已成功导入 {0} 名佣兵",
+
+    "ERR_FAIL_LOAD_FIGHTER": "无法反序列化佣兵：",
+    "ERR_FAIL_LOAD_GRID": "加载战斗阵列状态失败：",
+    "ERR_FAIL_LOAD_BENCH": "加载后备席状态失败：",
+    "ERR_FAIL_CREA_FIGHTER": "创建佣兵失败：",
+    "ERR_IMPORT_FAIL": "导入失败：",
+    "ERR_PROC_IMPORT_DATA": "处理导入数据时出错：{0}",
+
+    "ERR_IVLD_FIGHTER_DATA": "无效的佣兵数据：目标不是对象",
+    "ERR_IVLD_FIGHTER_CLS": "无效或缺失的佣兵职业",
+    "ERR_IVLD_FIGHTER_CLS_PLH": "{0} 不是有效的职业，请检查输入。",
+    "ERR_IVLD_API_FORMAT": "无效的 API 响应格式：缺少或错误的 'output' 数组。",
+
+    "INFO_SEARCH_IN_ITEMS": "正在 {0} 项物品中搜索地城预设",
+    "INFO_AVIL_PRESET": "可用的预设：",
+    "INFO_NO_AVIL_PRESET": "未找到带有 '地下城' 指派的预设，未导入任何内容。",
+    "INFO_PRESET_FOUND": "已找到地下城预设：{0}，包含 {1} 名佣兵",
+    "INFO_PROC_FIGHTER": "正在处理佣兵：{0}　职业：{1}"
+  },
+
+  "Alerts": {
+    "ERR_FAIL_CREA_FIGHTER": "创建佣兵失败,请检查你输入的数值.",
+    "ERR_NULL_API": "导入前请先输入API秘钥",
+    "ERR_HTTP_ERROR": "HTTP 错误! 状态: {0}",
+    "ERR_IMPORT_FAIL": "导入失败，原因: {0}",
+    "SUCC_IMPORT_FIGHTER": "成功从预设中导入 {0} 个佣兵信息"
+  },
+
+  "BattleInfo": {
+    "MOB": "怪物",
+    "FIGHTER": "佣兵",
+
+    "MOB_ATK_NAME": "等级 {0} 的 {1}",
+    "MOB_TGT_NAME": "等级 {0} 的 {1}",
+
+    "HEADERS": ["后排怪物", "前排怪物", "前排佣兵", "后排佣兵"],
+
+    "LOSE_DUE_TO_EXHAUST": "佣兵因疲劳输掉战斗！",
+    "HEALTH_0": "血量为 0",
+    "HEALTH_TABLE_LINE": "{0} 等级 {1}",
+
+    "ROUND_INFO": "轮次: {0}, 攻击回合: {1}",
+    "FINAL_ROUND": "轮次最终情况",
+
+    "DAMAGE_INFO": "{0} 命中 {1} 造成 {2} 伤害",
+    "ATK_MISS": "{0} 的攻击未命中 {1}.",
+    "CRT_RNG_INFO": "暴击随机值：{0}} < 0.1",
+    "ATK_CANNOT_DODGE": "{0} 的攻击无法闪避",
+    "ATK_RNG_SUCC": "攻击命中判定成功：随机值 {0} < 阈值 {1}",
+
+    "SP_SD_EVADED": "暗影舞者闪避成功。下次攻击将造成双倍伤害。",
+    "SP_SD_APL_DOUBLEDMG": "暗影舞者造成双倍伤害",
+    "SP_BR_DOUBLE": "格斗家造成了两次伤害！",
+    "SP_PL_DMG_REDUCTION": "圣骑士的光环提供了15%减伤",
+    "SP_BS_DMG_DODGE": "堡垒的光环提供了25%的减伤和50%额外闪避概率",
+    "PRIEST_RESURRECTED": "牧师复活了 {0}",
+
+    "ERR_IVLD_TGT_ID": "{0} 的攻击没有有效目标",
+    "ERR_IVLD_ATKR": "无效的攻击者",
+    "ERR_IVLD_TGT": "无效的目标"
+  },
+
+  "MobInfo": {
+    "MOB": "怪物",
+    "BOSS": "Boss"
+  }
+}

@@ -1,13 +1,9 @@
-// Queslar Dungeon Stat Optimizer v3
-// Optimized version with adaptive test counts + free gold investment feature
-//
-// Credit to anfneub for the battle simulation engine
-// https://anfneub.github.io/QueslarDungeonSim/
+// Queslar Dungeon Stat Optimizer v2
+// Optimized version with adaptive test counts (30->5->10->10->10->10 cycle)
 
 import nodeFetch from 'node-fetch';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { fileURLToPath } from 'url';
-import * as readline from 'readline';
 
 global.fetch = nodeFetch;
 
@@ -352,125 +348,9 @@ async function spendResidualGold(fighterData, residualGold, allStats, currentRat
   }
 }
 
-// Ask user for input
-function askQuestion(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  return new Promise(resolve => {
-    rl.question(question, answer => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
-
-// Invest free gold - test in 20M increments across top 5 stats
-async function investFreeGold(fighterData, freeGoldMillions, allStats, currentRate) {
-  const freeGold = freeGoldMillions * 1000000;
-
-  console.log(`\n${'#'.repeat(60)}`);
-  console.log(`FREE GOLD INVESTMENT: ${freeGoldMillions}M gold`);
-  console.log('#'.repeat(60));
-
-  // First, find top 5 stats by testing 20M addition to each
-  console.log('\nPhase 1: Finding top 5 stats to invest in...');
-  let statResults = [];
-
-  for (let i = 0; i < allStats.length; i++) {
-    const dst = allStats[i];
-    const dstFighter = fighterData[dst.idx];
-    const dstPoints = dstFighter.stats[dst.stat];
-
-    const pointsToAdd = pointsToAddForGold(dstPoints, 20000000);
-    if (pointsToAdd <= 0) continue;
-
-    dstFighter.stats[dst.stat] += pointsToAdd;
-    const rate = await runBattles(fighterData, NUM_BATTLES);
-    dstFighter.stats[dst.stat] -= pointsToAdd;
-
-    statResults.push({ stat: dst, rate, pointsAdded: pointsToAdd });
-    process.stdout.write(`\r  Testing ${i + 1}/${allStats.length}...`);
-  }
-
-  console.log('');
-
-  // Sort and get top 5
-  statResults.sort((a, b) => b.rate - a.rate);
-  const top5 = statResults.slice(0, 5);
-
-  console.log('\nTop 5 stats for investment:');
-  for (let i = 0; i < top5.length; i++) {
-    const t = top5[i];
-    console.log(`  ${i + 1}. ${fighterData[t.stat.idx].name}.${t.stat.stat} = ${(t.rate * 100).toFixed(3)}%`);
-  }
-
-  // Now test investing in 20M increments
-  console.log(`\nPhase 2: Testing ${freeGoldMillions}M investment in 20M increments...`);
-
-  const numIncrements = Math.floor(freeGold / 20000000);
-  const recommendations = [];
-
-  for (const candidate of top5) {
-    const dst = candidate.stat;
-    const dstFighter = fighterData[dst.idx];
-    const originalPoints = dstFighter.stats[dst.stat];
-
-    // Test adding full amount
-    let totalPointsAdded = 0;
-    let currentPts = originalPoints;
-    for (let inc = 0; inc < numIncrements; inc++) {
-      const ptsToAdd = pointsToAddForGold(currentPts, 20000000);
-      totalPointsAdded += ptsToAdd;
-      currentPts += ptsToAdd;
-    }
-
-    if (totalPointsAdded <= 0) continue;
-
-    dstFighter.stats[dst.stat] = originalPoints + totalPointsAdded;
-    const rate = await runBattles(fighterData, NUM_BATTLES);
-    dstFighter.stats[dst.stat] = originalPoints;
-
-    recommendations.push({
-      fighter: dstFighter.name,
-      stat: dst.stat,
-      pointsToAdd: totalPointsAdded,
-      newRate: rate,
-      improvement: rate - currentRate
-    });
-  }
-
-  // Sort by improvement
-  recommendations.sort((a, b) => b.improvement - a.improvement);
-
-  console.log(`\n${'='.repeat(60)}`);
-  console.log('INVESTMENT RECOMMENDATIONS');
-  console.log('='.repeat(60));
-  console.log(`Current win rate: ${(currentRate * 100).toFixed(3)}%\n`);
-
-  for (let i = 0; i < recommendations.length; i++) {
-    const r = recommendations[i];
-    console.log(`${i + 1}. ${r.fighter}.${r.stat}`);
-    console.log(`   Add ${r.pointsToAdd} points`);
-    console.log(`   New win rate: ${(r.newRate * 100).toFixed(3)}% (+${(r.improvement * 100).toFixed(3)}%)`);
-    console.log('');
-  }
-
-  if (recommendations.length > 0) {
-    const best = recommendations[0];
-    console.log(`\nBEST: Invest ${freeGoldMillions}M in ${best.fighter}.${best.stat} (+${best.pointsToAdd} pts)`);
-    console.log(`Expected improvement: ${(currentRate * 100).toFixed(3)}% -> ${(best.newRate * 100).toFixed(3)}%`);
-  }
-
-  console.log('#'.repeat(60));
-  return recommendations;
-}
-
 async function main() {
   console.log('='.repeat(60));
-  console.log('QUESLAR DUNGEON STAT OPTIMIZER v3');
+  console.log('QUESLAR DUNGEON STAT OPTIMIZER v2');
   console.log('='.repeat(60));
   console.log(`Dungeon Level: ${DUNGEON_LEVEL}`);
   console.log(`Battles per test: ${NUM_BATTLES.toLocaleString()}`);
@@ -499,17 +379,6 @@ async function main() {
     for (const stat of STATS) {
       allStats.push({ idx, stat });
     }
-  }
-
-  // Ask user if they have free gold to invest
-  const freeGoldInput = await askQuestion('\nDo you have free gold to invest? Enter amount in millions (e.g., 100) or 0/Enter to skip: ');
-  const freeGoldMillions = parseInt(freeGoldInput) || 0;
-
-  if (freeGoldMillions >= 20) {
-    await investFreeGold(fighterData, freeGoldMillions, allStats, currentRate);
-    console.log('\nNote: The above are recommendations only. Optimizer will now continue with reallocation optimization.\n');
-  } else if (freeGoldMillions > 0) {
-    console.log(`\nFree gold (${freeGoldMillions}M) is less than 20M minimum. Skipping investment analysis.\n`);
   }
 
   // Track top performers

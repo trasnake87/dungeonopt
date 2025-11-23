@@ -1,13 +1,9 @@
-// Queslar Dungeon Stat Optimizer v3
-// Optimized version with adaptive test counts + free gold investment feature
-//
-// Credit to anfneub for the battle simulation engine
-// https://anfneub.github.io/QueslarDungeonSim/
+// Queslar Dungeon Stat Optimizer
+// Greedy hill-climbing optimizer that moves stat points between fighters
 
 import nodeFetch from 'node-fetch';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { fileURLToPath } from 'url';
-import * as readline from 'readline';
 
 global.fetch = nodeFetch;
 
@@ -71,10 +67,13 @@ function pointsToGold(points) {
 
 // Calculate how many points can be removed from currentPoints to free up targetGold
 function pointsToRemoveForGold(currentPoints, targetGold) {
+  // Cost of current points
   const currentCost = pointsToGold(currentPoints);
+  // We want to reduce to a cost that's targetGold less
   const targetCost = currentCost - targetGold;
-  if (targetCost < 0) return currentPoints;
+  if (targetCost < 0) return currentPoints; // Remove all
 
+  // Find points for targetCost: points = (-1 + sqrt(1 + 8*cost/10000)) / 2
   const newPoints = Math.floor((-1 + Math.sqrt(1 + 8 * targetCost / 10000)) / 2);
   return currentPoints - newPoints;
 }
@@ -111,6 +110,7 @@ async function loadFromAPI() {
     const equipment = apiData.equipment || {};
     const equipmentStats = equipment.stats || [];
 
+    // Calculate equipment bonuses
     let equipmentBonuses = {
       health: 0, damage: 0, hit: 0, defense: 0, critDamage: 0, dodge: 0
     };
@@ -197,6 +197,7 @@ function createFightersGrid(fighterData) {
 if (!isMainThread) {
   const { fighterData, numBattles, dungeonLevel } = workerData;
 
+  // Recreate grid from fighter data
   const grid = Array.from({ length: 3 }, () => Array.from({ length: 2 }, () => null));
   for (const fd of fighterData) {
     const fighter = new Fighter(fd.class, {
@@ -274,18 +275,7 @@ async function runBattles(fighterData, numBattles) {
   return totalWins / (battlesPerWorker * NUM_WORKERS);
 }
 
-// Calculate total gold invested across all fighters
-function getTotalGoldInvested(fighterData) {
-  let totalGold = 0;
-  for (const fd of fighterData) {
-    for (const stat of STATS) {
-      totalGold += pointsToGold(fd.stats[stat]);
-    }
-  }
-  return totalGold;
-}
-
-function printCurrentStats(fighterData, totalBudget = null) {
+function printCurrentStats(fighterData) {
   console.log('\nCurrent optimal stat allocation:');
   console.log('  | Fighter                   | health | damage | hit | defense | critDamage | dodge |');
   console.log('  |---------------------------|--------|--------|-----|---------|------------|-------|');
@@ -296,185 +286,21 @@ function printCurrentStats(fighterData, totalBudget = null) {
     const name = `${fd.name} (${fd.class})`.padEnd(25);
     console.log(`  | ${name} | ${String(s.health).padStart(6)} | ${String(s.damage).padStart(6)} | ${String(s.hit).padStart(3)} | ${String(s.defense).padStart(7)} | ${String(s.critDamage).padStart(10)} | ${String(s.dodge).padStart(5)} |`);
 
+    // Calculate gold for this fighter
     for (const stat of STATS) {
       totalGold += pointsToGold(s[stat]);
     }
   }
 
   console.log(`\n  Total gold invested: ${(totalGold / 1000000).toFixed(2)}M`);
-  if (totalBudget) {
-    const residual = totalBudget - totalGold;
-    console.log(`  Residual gold: ${(residual / 1000000).toFixed(2)}M`);
-  }
-}
-
-// Spend residual gold - test adding to each stat and pick the best
-async function spendResidualGold(fighterData, residualGold, allStats, currentRate) {
-  console.log(`\n  ${'~'.repeat(50)}`);
-  console.log(`  RESIDUAL ROUND: Spending ${(residualGold / 1000000).toFixed(2)}M residual gold`);
-  console.log(`  ${'~'.repeat(50)}`);
-
-  let bestDst = null;
-  let bestRate = currentRate;
-  let bestPointsAdded = 0;
-
-  for (let i = 0; i < allStats.length; i++) {
-    const dst = allStats[i];
-    const dstFighter = fighterData[dst.idx];
-    const dstPoints = dstFighter.stats[dst.stat];
-
-    const pointsToAdd = pointsToAddForGold(dstPoints, residualGold);
-    if (pointsToAdd <= 0) continue;
-
-    dstFighter.stats[dst.stat] += pointsToAdd;
-    const rate = await runBattles(fighterData, NUM_BATTLES);
-    dstFighter.stats[dst.stat] -= pointsToAdd;
-
-    process.stdout.write(`\r    Testing ${i + 1}/${allStats.length} - Best: ${(bestRate * 100).toFixed(3)}%`);
-
-    if (rate > bestRate) {
-      bestRate = rate;
-      bestDst = dst;
-      bestPointsAdded = pointsToAdd;
-    }
-  }
-
-  console.log('');
-
-  if (bestDst && bestRate > currentRate) {
-    fighterData[bestDst.idx].stats[bestDst.stat] += bestPointsAdded;
-    console.log(`  Residual spent: ${fighterData[bestDst.idx].name}.${bestDst.stat} (+${bestPointsAdded}pts)`);
-    console.log(`  Win rate: ${(currentRate * 100).toFixed(3)}% -> ${(bestRate * 100).toFixed(3)}%`);
-    return bestRate;
-  } else {
-    console.log(`  No improvement from residual spending`);
-    return currentRate;
-  }
-}
-
-// Ask user for input
-function askQuestion(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  return new Promise(resolve => {
-    rl.question(question, answer => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
-
-// Invest free gold - test in 20M increments across top 5 stats
-async function investFreeGold(fighterData, freeGoldMillions, allStats, currentRate) {
-  const freeGold = freeGoldMillions * 1000000;
-
-  console.log(`\n${'#'.repeat(60)}`);
-  console.log(`FREE GOLD INVESTMENT: ${freeGoldMillions}M gold`);
-  console.log('#'.repeat(60));
-
-  // First, find top 5 stats by testing 20M addition to each
-  console.log('\nPhase 1: Finding top 5 stats to invest in...');
-  let statResults = [];
-
-  for (let i = 0; i < allStats.length; i++) {
-    const dst = allStats[i];
-    const dstFighter = fighterData[dst.idx];
-    const dstPoints = dstFighter.stats[dst.stat];
-
-    const pointsToAdd = pointsToAddForGold(dstPoints, 20000000);
-    if (pointsToAdd <= 0) continue;
-
-    dstFighter.stats[dst.stat] += pointsToAdd;
-    const rate = await runBattles(fighterData, NUM_BATTLES);
-    dstFighter.stats[dst.stat] -= pointsToAdd;
-
-    statResults.push({ stat: dst, rate, pointsAdded: pointsToAdd });
-    process.stdout.write(`\r  Testing ${i + 1}/${allStats.length}...`);
-  }
-
-  console.log('');
-
-  // Sort and get top 5
-  statResults.sort((a, b) => b.rate - a.rate);
-  const top5 = statResults.slice(0, 5);
-
-  console.log('\nTop 5 stats for investment:');
-  for (let i = 0; i < top5.length; i++) {
-    const t = top5[i];
-    console.log(`  ${i + 1}. ${fighterData[t.stat.idx].name}.${t.stat.stat} = ${(t.rate * 100).toFixed(3)}%`);
-  }
-
-  // Now test investing in 20M increments
-  console.log(`\nPhase 2: Testing ${freeGoldMillions}M investment in 20M increments...`);
-
-  const numIncrements = Math.floor(freeGold / 20000000);
-  const recommendations = [];
-
-  for (const candidate of top5) {
-    const dst = candidate.stat;
-    const dstFighter = fighterData[dst.idx];
-    const originalPoints = dstFighter.stats[dst.stat];
-
-    // Test adding full amount
-    let totalPointsAdded = 0;
-    let currentPts = originalPoints;
-    for (let inc = 0; inc < numIncrements; inc++) {
-      const ptsToAdd = pointsToAddForGold(currentPts, 20000000);
-      totalPointsAdded += ptsToAdd;
-      currentPts += ptsToAdd;
-    }
-
-    if (totalPointsAdded <= 0) continue;
-
-    dstFighter.stats[dst.stat] = originalPoints + totalPointsAdded;
-    const rate = await runBattles(fighterData, NUM_BATTLES);
-    dstFighter.stats[dst.stat] = originalPoints;
-
-    recommendations.push({
-      fighter: dstFighter.name,
-      stat: dst.stat,
-      pointsToAdd: totalPointsAdded,
-      newRate: rate,
-      improvement: rate - currentRate
-    });
-  }
-
-  // Sort by improvement
-  recommendations.sort((a, b) => b.improvement - a.improvement);
-
-  console.log(`\n${'='.repeat(60)}`);
-  console.log('INVESTMENT RECOMMENDATIONS');
-  console.log('='.repeat(60));
-  console.log(`Current win rate: ${(currentRate * 100).toFixed(3)}%\n`);
-
-  for (let i = 0; i < recommendations.length; i++) {
-    const r = recommendations[i];
-    console.log(`${i + 1}. ${r.fighter}.${r.stat}`);
-    console.log(`   Add ${r.pointsToAdd} points`);
-    console.log(`   New win rate: ${(r.newRate * 100).toFixed(3)}% (+${(r.improvement * 100).toFixed(3)}%)`);
-    console.log('');
-  }
-
-  if (recommendations.length > 0) {
-    const best = recommendations[0];
-    console.log(`\nBEST: Invest ${freeGoldMillions}M in ${best.fighter}.${best.stat} (+${best.pointsToAdd} pts)`);
-    console.log(`Expected improvement: ${(currentRate * 100).toFixed(3)}% -> ${(best.newRate * 100).toFixed(3)}%`);
-  }
-
-  console.log('#'.repeat(60));
-  return recommendations;
 }
 
 async function main() {
   console.log('='.repeat(60));
-  console.log('QUESLAR DUNGEON STAT OPTIMIZER v3');
+  console.log('QUESLAR DUNGEON STAT OPTIMIZER');
   console.log('='.repeat(60));
   console.log(`Dungeon Level: ${DUNGEON_LEVEL}`);
   console.log(`Battles per test: ${NUM_BATTLES.toLocaleString()}`);
-  console.log('Optimization: Adaptive test counts (30->5->10->10->10->10 cycle)');
   console.log('');
 
   const fighterData = await loadFromAPI();
@@ -485,13 +311,10 @@ async function main() {
   console.log(`Baseline win rate: ${(baselineRate * 100).toFixed(3)}%`);
 
   let currentRate = baselineRate;
-  let goldBudget = 20000000;
+  let goldBudget = 20000000; // Start with 20M gold moves
+  let improvementsThisRound = 0;
   let totalImprovements = 0;
   let round = 1;
-
-  // Calculate total budget (initial gold invested)
-  const totalBudget = getTotalGoldInvested(fighterData);
-  console.log(`Total budget: ${(totalBudget / 1000000).toFixed(2)}M gold`);
 
   // Build list of all stats (fighter index + stat name)
   const allStats = [];
@@ -501,181 +324,138 @@ async function main() {
     }
   }
 
-  // Ask user if they have free gold to invest
-  const freeGoldInput = await askQuestion('\nDo you have free gold to invest? Enter amount in millions (e.g., 100) or 0/Enter to skip: ');
-  const freeGoldMillions = parseInt(freeGoldInput) || 0;
-
-  if (freeGoldMillions >= 20) {
-    await investFreeGold(fighterData, freeGoldMillions, allStats, currentRate);
-    console.log('\nNote: The above are recommendations only. Optimizer will now continue with reallocation optimization.\n');
-  } else if (freeGoldMillions > 0) {
-    console.log(`\nFree gold (${freeGoldMillions}M) is less than 20M minimum. Skipping investment analysis.\n`);
-  }
-
-  // Track top performers
-  let topDestinations = []; // Array of { stat, rate, pointsAdded }
-  let topSources = []; // Array of { stat, rate, pointsRemoved }
-  let cycleRound = 1; // 1-6, resets after 6
-
   console.log(`\nTotal stats to optimize: ${allStats.length}`);
-  console.log('Starting optimized two-phase optimization...\n');
+  console.log('Starting two-phase optimization (30 + 29 tests per round)...\n');
 
   while (true) {
     console.log(`\n${'='.repeat(60)}`);
-    console.log(`ROUND ${round} (Cycle ${cycleRound}/6) - Testing ${(goldBudget/1000000).toFixed(0)}M gold moves`);
+    console.log(`ROUND ${round} - Testing ${(goldBudget/1000000).toFixed(0)}M gold moves`);
     console.log('='.repeat(60));
 
-    // Determine which stats to test this round
-    let dstStatsToTest, srcStatsToTest;
-
-    if (cycleRound === 1) {
-      // Full scan - test all 30/29
-      dstStatsToTest = allStats;
-      srcStatsToTest = allStats;
-      console.log('  Full scan: testing all stats');
-    } else if (cycleRound === 2) {
-      // Test top 5 only
-      dstStatsToTest = topDestinations.slice(0, 5).map(t => t.stat);
-      srcStatsToTest = topSources.slice(0, 5).map(t => t.stat);
-      console.log('  Quick scan: testing top 5 stats');
-    } else {
-      // Test top 10
-      dstStatsToTest = topDestinations.slice(0, 10).map(t => t.stat);
-      srcStatsToTest = topSources.slice(0, 10).map(t => t.stat);
-      console.log('  Normal scan: testing top 10 stats');
-    }
-
-    // PHASE 1: Find best destination
-    console.log(`\n  Phase 1: Finding best stat to invest in (${dstStatsToTest.length} tests)...`);
-    let dstResults = [];
+    // PHASE 1: Find best destination (add gold to each stat)
+    console.log('\n  Phase 1: Finding best stat to invest in...');
+    let bestDst = null;
     let bestDstRate = 0;
+    let bestDstPointsAdded = 0;
 
-    for (let i = 0; i < dstStatsToTest.length; i++) {
-      const dst = dstStatsToTest[i];
+    for (let i = 0; i < allStats.length; i++) {
+      const dst = allStats[i];
       const dstFighter = fighterData[dst.idx];
       const dstPoints = dstFighter.stats[dst.stat];
 
+      // Calculate points to add with goldBudget
       const pointsToAdd = pointsToAddForGold(dstPoints, goldBudget);
       if (pointsToAdd <= 0) continue;
 
+      // Add the points
       dstFighter.stats[dst.stat] += pointsToAdd;
+
+      // Test
       const rate = await runBattles(fighterData, NUM_BATTLES);
+
+      process.stdout.write(`\r    Testing ${i + 1}/${allStats.length} destinations - Best: ${(bestDstRate * 100).toFixed(3)}%`);
+
+      if (rate > bestDstRate) {
+        bestDstRate = rate;
+        bestDst = dst;
+        bestDstPointsAdded = pointsToAdd;
+      }
+
+      // Undo
       dstFighter.stats[dst.stat] -= pointsToAdd;
-
-      dstResults.push({ stat: dst, rate, pointsAdded: pointsToAdd });
-
-      if (rate > bestDstRate) bestDstRate = rate;
-      process.stdout.write(`\r    Testing ${i + 1}/${dstStatsToTest.length} destinations - Best: ${(bestDstRate * 100).toFixed(3)}%`);
     }
 
     console.log('');
 
-    // Sort and update top destinations (only on full scan)
-    dstResults.sort((a, b) => b.rate - a.rate);
-    if (cycleRound === 1) {
-      topDestinations = dstResults.slice(0, 10);
-    }
-
-    if (dstResults.length === 0) {
+    if (!bestDst) {
       console.log('  No valid destination found');
       break;
     }
 
-    const bestDst = dstResults[0];
-    console.log(`    Best destination: ${fighterData[bestDst.stat.idx].name}.${bestDst.stat.stat} (+${bestDst.pointsAdded}pts) = ${(bestDst.rate * 100).toFixed(3)}%`);
+    console.log(`    Best destination: ${fighterData[bestDst.idx].name}.${bestDst.stat} (+${bestDstPointsAdded}pts) = ${(bestDstRate * 100).toFixed(3)}%`);
 
-    // PHASE 2: Find best source
-    console.log(`\n  Phase 2: Finding best stat to pull from (${srcStatsToTest.length} tests)...`);
-    let srcResults = [];
+    // PHASE 2: Find best source (remove gold from each stat except destination)
+    console.log('\n  Phase 2: Finding best stat to pull from...');
+    let bestSrc = null;
     let bestSrcRate = 0;
+    let bestSrcPointsRemoved = 0;
 
-    // Add destination points first
-    fighterData[bestDst.stat.idx].stats[bestDst.stat.stat] += bestDst.pointsAdded;
+    // First add the destination points
+    fighterData[bestDst.idx].stats[bestDst.stat] += bestDstPointsAdded;
 
-    for (let i = 0; i < srcStatsToTest.length; i++) {
-      const src = srcStatsToTest[i];
+    for (let i = 0; i < allStats.length; i++) {
+      const src = allStats[i];
 
       // Skip if same as destination
-      if (src.idx === bestDst.stat.idx && src.stat === bestDst.stat.stat) continue;
+      if (src.idx === bestDst.idx && src.stat === bestDst.stat) continue;
 
       const srcFighter = fighterData[src.idx];
       const srcPoints = srcFighter.stats[src.stat];
 
+      // Check if this stat has at least goldBudget invested
       const currentGold = pointsToGold(srcPoints);
       if (currentGold < goldBudget) continue;
 
+      // Calculate points to remove for goldBudget
       const pointsToRemove = pointsToRemoveForGold(srcPoints, goldBudget);
       if (pointsToRemove <= 0) continue;
 
+      // Remove the points
       srcFighter.stats[src.stat] -= pointsToRemove;
+
+      // Test
       const rate = await runBattles(fighterData, NUM_BATTLES);
+
+      process.stdout.write(`\r    Testing ${i + 1}/${allStats.length} sources - Best: ${(bestSrcRate * 100).toFixed(3)}%`);
+
+      if (rate > bestSrcRate) {
+        bestSrcRate = rate;
+        bestSrc = src;
+        bestSrcPointsRemoved = pointsToRemove;
+      }
+
+      // Undo
       srcFighter.stats[src.stat] += pointsToRemove;
-
-      srcResults.push({ stat: src, rate, pointsRemoved: pointsToRemove });
-
-      if (rate > bestSrcRate) bestSrcRate = rate;
-      process.stdout.write(`\r    Testing ${i + 1}/${srcStatsToTest.length} sources - Best: ${(bestSrcRate * 100).toFixed(3)}%`);
     }
 
     // Undo destination add
-    fighterData[bestDst.stat.idx].stats[bestDst.stat.stat] -= bestDst.pointsAdded;
+    fighterData[bestDst.idx].stats[bestDst.stat] -= bestDstPointsAdded;
 
     console.log('');
 
-    // Sort and update top sources (only on full scan)
-    srcResults.sort((a, b) => b.rate - a.rate);
-    if (cycleRound === 1) {
-      topSources = srcResults.slice(0, 10);
-    }
-
-    if (srcResults.length === 0) {
+    if (!bestSrc) {
       console.log('  No valid source found');
       break;
     }
 
-    const bestSrc = srcResults[0];
-    console.log(`    Best source: ${fighterData[bestSrc.stat.idx].name}.${bestSrc.stat.stat} (-${bestSrc.pointsRemoved}pts)`);
+    console.log(`    Best source: ${fighterData[bestSrc.idx].name}.${bestSrc.stat} (-${bestSrcPointsRemoved}pts)`);
 
     // Check if move improves over current
-    if (bestSrc.rate > currentRate) {
+    if (bestSrcRate > currentRate) {
       // Apply the move
-      fighterData[bestSrc.stat.idx].stats[bestSrc.stat.stat] -= bestSrc.pointsRemoved;
-      fighterData[bestDst.stat.idx].stats[bestDst.stat.stat] += bestDst.pointsAdded;
+      fighterData[bestSrc.idx].stats[bestSrc.stat] -= bestSrcPointsRemoved;
+      fighterData[bestDst.idx].stats[bestDst.stat] += bestDstPointsAdded;
 
       console.log(`\n  IMPROVEMENT FOUND!`);
-      console.log(`  ${fighterData[bestSrc.stat.idx].name}.${bestSrc.stat.stat} (-${bestSrc.pointsRemoved}pts) -> ${fighterData[bestDst.stat.idx].name}.${bestDst.stat.stat} (+${bestDst.pointsAdded}pts)`);
-      console.log(`  Win rate: ${(currentRate * 100).toFixed(3)}% -> ${(bestSrc.rate * 100).toFixed(3)}%`);
-      console.log(`  Improvement: +${((bestSrc.rate - currentRate) * 100).toFixed(3)}%`);
+      console.log(`  ${fighterData[bestSrc.idx].name}.${bestSrc.stat} (-${bestSrcPointsRemoved}pts) -> ${fighterData[bestDst.idx].name}.${bestDst.stat} (+${bestDstPointsAdded}pts)`);
+      console.log(`  Win rate: ${(currentRate * 100).toFixed(3)}% -> ${(bestSrcRate * 100).toFixed(3)}%`);
+      console.log(`  Improvement: +${((bestSrcRate - currentRate) * 100).toFixed(3)}%`);
 
-      currentRate = bestSrc.rate;
+      currentRate = bestSrcRate;
       totalImprovements++;
 
-      printCurrentStats(fighterData, totalBudget);
-
-      // Check for residual gold >= 10M and spend it
-      const currentInvested = getTotalGoldInvested(fighterData);
-      const residualGold = totalBudget - currentInvested;
-      if (residualGold >= 10000000) {
-        currentRate = await spendResidualGold(fighterData, residualGold, allStats, currentRate);
-        printCurrentStats(fighterData, totalBudget);
-      }
-
-      // Advance cycle
-      cycleRound++;
-      if (cycleRound > 6) cycleRound = 1;
+      printCurrentStats(fighterData);
     } else {
       console.log(`\n  No improvement found at ${(goldBudget/1000000).toFixed(0)}M gold level`);
-      console.log(`  Best possible: ${(bestSrc.rate * 100).toFixed(3)}% vs current: ${(currentRate * 100).toFixed(3)}%`);
+      console.log(`  Best possible: ${(bestSrcRate * 100).toFixed(3)}% vs current: ${(currentRate * 100).toFixed(3)}%`);
 
-      // Reduce budget and reset cycle
+      // Reduce budget
       if (goldBudget === 20000000) {
         goldBudget = 10000000;
         console.log('  Reducing to 10M gold moves...');
-        cycleRound = 1; // Reset to full scan
       } else if (goldBudget === 10000000) {
         goldBudget = 5000000;
         console.log('  Reducing to 5M gold moves...');
-        cycleRound = 1; // Reset to full scan
       } else {
         console.log('\n  Optimization complete - no further improvements possible');
         break;

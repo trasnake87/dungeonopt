@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title data-i18n="page_title">
+            Queslar Rewritten Dungeon Simulator
+        </title>
+        <link rel="stylesheet" href="./styles/main.css" />
+    </head>
+    <body>
+        <header style="display: flex; flex-direction: row">
+            <h1 data-i18n="header">
+                Queslar Rewritten Dungeon Simulator
+                <span
+                    style="
+                        color: #ff4444;
+                        font-size: 0.6em;
+                        vertical-align: super;
+                    "
+                    >BETA</span
+                >
+            </h1>
+            <div class="language-switcher">
+                <span class="language-label" data-i18n="language_en">EN</span>
+                <label class="language-slider">
+                    <input
+                        type="checkbox"
+                        id="languageToggle"
+                        class="language-checkbox"
+                    />
+                    <span class="slider">
+                        <span class="slider-labels">
+                            <span>EN</span>
+                            <span>CN</span>
+                        </span>
+                    </span>
+                </label>
+                <span class="language-label" data-i18n="language_cn">CN</span>
+            </div>
+        </header>
+
+        <div class="app-layout">
+            <div class="bench-section">
+                <div
+                    class="label"
+                    style="margin-bottom: 0.5em"
+                    data-i18n="bench"
+                >
+                    Bench
+                </div>
+                <div
+                    style="
+                        font-size: 0.8em;
+                        color: #8892b0;
+                        margin-bottom: 0.8em;
+                    "
+                    data-i18n="bench_description"
+                >
+                    Drag fighters between bench and battle slots
+                </div>
+                <div id="benchGrid" class="bench-grid"></div>
+                <div
+                    id="addToBench"
+                    class="add-to-bench"
+                    data-i18n="add_fighter"
+                >
+                    + Add Fighter
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="form-grid">
+                    <div class="card">
+                        <label class="label" data-i18n="dungeon_level"
+                            >Dungeon level</label
+                        >
+                        <input
+                            id="mobLevel"
+                            type="number"
+                            value="200"
+                            min="1"
+                            step="1"
+                        />
+                    </div>
+                    <div class="card">
+                        <label class="label" data-i18n="number_of_battles"
+                            >Number of battles<span
+                                class="info-icon"
+                                tabindex="0"
+                                data-tooltip="When Verbose is active, only one battle will be shown"
+                            ></span
+                        ></label>
+                        <div
+                            class="row"
+                            style="gap: 0.8em; align-items: center"
+                        >
+                            <input
+                                id="numBattles"
+                                type="number"
+                                value="1"
+                                min="1"
+                                step="1"
+                            />
+                            <label class="row" style="gap: 0.4em">
+                                <input id="verbose" type="checkbox" />
+                                <span data-i18n="verbose">Verbose</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: -0.6em">
+                    <label class="label" data-i18n="api_key">
+                        API Key<span
+                            class="info-icon"
+                            tabindex="0"
+                            data-tooltip="You can find you own API key under Settings > PI"
+                        ></span>
+                    </label>
+                    <div class="row" style="gap: 0.8em; align-items: center">
+                        <input
+                            id="apiKey"
+                            type="text"
+                            placeholder="Enter your Queslar API key"
+                            data-i18n-placeholder="api_key_placeholder"
+                            style="flex: 1"
+                        />
+                        <button
+                            id="importBtn"
+                            class="btn"
+                            data-i18n="import_button"
+                        >
+                            Import
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div
+                        class="row"
+                        style="
+                            margin-bottom: 0.5em;
+                            justify-content: flex-start;
+                        "
+                    >
+                        <span
+                            class="label"
+                            style="margin: 0"
+                            data-i18n="battle_formation"
+                            >Battle Formation</span
+                        >
+                        <div
+                            style="
+                                font-size: 0.8em;
+                                color: #8892b0;
+                                margin-top: 0.3em;
+                            "
+                            data-i18n="battle_formation_description"
+                        >
+                            Click to edit • Drag to move/swap
+                        </div>
+                    </div>
+                    <div id="fightersGrid" class="fighters-grid"></div>
+                </div>
+
+                <div class="row" style="gap: 0.8em">
+                    <button
+                        id="fightBtn"
+                        class="btn primary"
+                        data-i18n="fight_button"
+                    >
+                        ⚔️ Fight
+                    </button>
+                    <button
+                        id="clearLogBtn"
+                        class="btn secondary"
+                        data-i18n="clear_output_button"
+                    >
+                        Clear Output
+                    </button>
+                </div>
+
+                <div class="card">
+                    <label class="label" data-i18n="output">Output</label>
+                    <div id="output" class="output"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <span data-i18n="made_by">Proudly made by anfneub</span>
+            <span id="lastUpdated" data-i18n="last_updated"
+                >Last updated: 2025-10-08</span
+            >
+            <span class="link" id="changelogLink" data-i18n="changelog"
+                >Changelog</span
+            >
+            <span
+                style="
+                    font-size: 0.9em;
+                    color: #8892b0;
+                    text-align: center;
+                    white-space: nowrap;
+                "
+                ><span data-i18n="referral_text"
+                    >If you haven't used one already, please consider using
+                    my</span
+                >
+                <a
+                    href="https://v2.queslar.com/ref/zs70k27szt00x4t998atnq0dnx7mcx2f"
+                    target="_blank"
+                    style="color: #4fa3ff; text-decoration: underline"
+                    data-i18n="referral_link"
+                    >referral link</a
+                ></span
+            >
+        </footer>
+
+        <!-- Fighter Editor Modal -->
+        <div id="fighterModal" class="modal-backdrop">
+            <div class="modal">
+                <div
+                    style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 0.4em;
+                    "
+                >
+                    <h3 data-i18n="edit_fighter">
+                        Edit Fighter<span
+                            class="info-icon"
+                            tabindex="0"
+                            data-tooltip="On the left column, insert the number of upgrades for each stats. On the right column, the final values of the Fighter Item"
+                        ></span>
+                    </h3>
+                    <button
+                        id="closeFighterModal"
+                        class="btn secondary"
+                        data-i18n="close_button"
+                    >
+                        Close
+                    </button>
+                </div>
+                <div class="grid">
+                    <div style="grid-column: 1 / -1">
+                        <label data-i18n="class_label">Class</label>
+                        <select
+                            id="fighterClass"
+                            style="
+                                width: 100%;
+                                padding: 0.5em 0.7em;
+                                border-radius: 6px;
+                                border: 1px solid #2c3242;
+                                background: #181c24;
+                                color: #e6eaf3;
+                            "
+                        ></select>
+                    </div>
+                    <div style="grid-column: 1 / -1">
+                        <label data-i18n="name_label">Name</label>
+                        <input
+                            id="fighterName"
+                            type="text"
+                            placeholder="Fighter Name"
+                            data-i18n-placeholder="fighter_name_placeholder"
+                            style="
+                                width: 100%;
+                                padding: 0.5em 0.7em;
+                                border-radius: 6px;
+                                border: 1px solid #2c3242;
+                                background: #181c24;
+                                color: #e6eaf3;
+                                box-sizing: border-box;
+                            "
+                        />
+                    </div>
+                    <div>
+                        <label for="fighter_health" data-i18n="fighter_health"
+                            >Fighter Health</label
+                        >
+                        <input
+                            id="fighter_health"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label for="fighter_damage" data-i18n="fighter_damage"
+                            >Fighter Damage</label
+                        >
+                        <input
+                            id="fighter_damage"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label for="fighter_hit" data-i18n="fighter_hit"
+                            >Fighter Hit</label
+                        >
+                        <input
+                            id="fighter_hit"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label for="fighter_dodge" data-i18n="fighter_dodge"
+                            >Fighter Dodge</label
+                        >
+                        <input
+                            id="fighter_dodge"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label for="fighter_defense" data-i18n="fighter_defense"
+                            >Fighter Defense</label
+                        >
+                        <input
+                            id="fighter_defense"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label for="fighter_crit" data-i18n="fighter_crit"
+                            >Fighter Crit</label
+                        >
+                        <input
+                            id="fighter_crit"
+                            type="number"
+                            value="0"
+                            step="1"
+                            min="0"
+                        />
+                    </div>
+                    <div>
+                        <label data-i18n="item_health">Item Health</label>
+                        <input
+                            id="object_health"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label data-i18n="item_damage">Item Damage</label>
+                        <input
+                            id="object_damage"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label data-i18n="item_hit">Item Hit</label>
+                        <input
+                            id="object_hit"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label data-i18n="item_dodge">Item Dodge</label>
+                        <input
+                            id="object_dodge"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label data-i18n="item_defense">Item Defense</label>
+                        <input
+                            id="object_defense"
+                            type="number"
+                            value="0"
+                            step="1"
+                        /><br />
+                        <label data-i18n="item_crit">Item Crit (%)</label>
+                        <input
+                            id="object_crit"
+                            type="number"
+                            value="0"
+                            step="0.01"
+                            min="0"
+                        />
+                    </div>
+                </div>
+                <div
+                    class="row"
+                    style="margin-top: 0.8em; justify-content: flex-end"
+                >
+                    <button
+                        id="saveFighter"
+                        class="btn"
+                        data-i18n="save_button"
+                    >
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Changelog Modal -->
+        <div id="changelogModal" class="modal-backdrop">
+            <div class="modal">
+                <div
+                    style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 0.4em;
+                    "
+                >
+                    <h3 data-i18n="changelog">Changelog</h3>
+                    <button
+                        id="closeChangelog"
+                        class="btn secondary"
+                        data-i18n="close_button"
+                    >
+                        Close
+                    </button>
+                </div>
+                <div
+                    id="changelogContent"
+                    style="
+                        white-space: pre-wrap;
+                        background: #0f0f0f;
+                        padding: 1em;
+                        border-radius: 6px;
+                        max-height: 50vh;
+                        overflow: auto;
+                        font-size: 1em;
+                    "
+                >
+                    - Initial Dungeon UI
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Confirmation Modal -->
+        <div
+            id="importConfirmModal"
+            class="modal-backdrop"
+            style="display: none"
+        >
+            <div class="modal">
+                <div
+                    style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 0.4em;
+                    "
+                >
+                    <h3 data-i18n="confirm_import">Confirm Import</h3>
+                </div>
+                <div style="margin-bottom: 1em">
+                    <p data-i18n="import_warning">
+                        This will override all fighters currently in the Battle
+                        Formation. Are you sure you want to continue?
+                    </p>
+                </div>
+                <div style="margin-bottom: 1em">
+                    <label
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5em;
+                            font-size: 0.9em;
+                        "
+                    >
+                        <input id="dontShowImportWarning" type="checkbox" />
+                        <span data-i18n="dont_show_warning"
+                            >Do not show this warning anymore</span
+                        >
+                    </label>
+                </div>
+                <div class="row" style="gap: 0.8em; justify-content: flex-end">
+                    <button
+                        id="cancelImport"
+                        class="btn secondary"
+                        data-i18n="cancel_button"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        id="confirmImport"
+                        class="btn primary"
+                        data-i18n="ok_button"
+                    >
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="./app.js" defer></script>
+    </body>
+</html>

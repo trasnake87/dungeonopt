@@ -1,0 +1,170 @@
+{
+  "page_title": "Queslar Rewritten Dungeon Simulator",
+  "header": "Queslar Rewritten Dungeon Simulator\n                <span style=\"color: #ff4444; font-size: 0.6em; vertical-align: super;\">BETA</span>",
+  "bench": "Bench",
+  "bench_description": "Drag fighters between bench and battle slots",
+  "add_fighter": "+ Add Fighter",
+  "dungeon_level": "Dungeon level",
+  "number_of_battles": "Number of battles <span class=\"info-icon\" tabindex=\"0\" data-tooltip=\"Verbose will only be effective with exactly one battle\"></span>",
+  "verbose": "Verbose",
+  "api_key": "API Key\n <span class=\"info-icon\" tabindex=\"0\" data-tooltip=\"You can find you own API key under Settings > API\"></span>",
+  "api_key_placeholder": "Enter your Queslar API key",
+  "import_button": "Import",
+  "battle_formation": "Battle Formation",
+  "battle_formation_description": "Click to edit • Drag to move/swap",
+  "fight_button": "⚔️ Fight",
+  "clear_output_button": "Clear Output",
+  "output": "Output",
+  "made_by": "Proudly made by anfneub",
+  "last_updated": "Last updated: 2025-10-08",
+  "changelog": "Changelog",
+  "referral_text": "If you haven't used one already, please consider using my",
+  "referral_link": "referral link",
+  "edit_fighter": "Edit Fighter",
+  "close_button": "Close",
+  "class_label": "Class",
+  "name_label": "Name",
+  "fighter_name_placeholder": "Fighter Name",
+  "fighter_health": "Fighter Health",
+  "fighter_damage": "Fighter Damage",
+  "fighter_hit": "Fighter Hit",
+  "fighter_dodge": "Fighter Dodge",
+  "fighter_defense": "Fighter Defense",
+  "fighter_crit": "Fighter Crit",
+  "item_health": "Item Health",
+  "item_damage": "Item Damage",
+  "item_hit": "Item Hit",
+  "item_dodge": "Item Dodge",
+  "item_defense": "Item Defense",
+  "item_crit": "Item Crit (%)",
+  "save_button": "Save",
+  "confirm_import": "Confirm Import",
+  "import_warning": "This will override all fighters currently in the Battle Formation. Are you sure you want to continue?",
+  "dont_show_warning": "Do not show this warning anymore",
+  "cancel_button": "Cancel",
+  "ok_button": "OK",
+  "language_en": "EN",
+  "language_cn": "CN",
+
+  "Below All For App.js [This line using as Comment]": "Below All For App.js [This line using as Comment]",
+
+  "class_descriptions": {
+    "assassin": "The assassin prioritises the back column first",
+    "brawler": "The brawler has 15% chance to attack twice",
+    "hunter": "The hunter attacks hits a row dealing 75% damage to every enemy fighter",
+    "mage": "The mage attacks hits a column dealing 50% damage to every enemy fighter",
+    "priest": "While alive the priest has a 10% chance to resurrect a random dead fighter on your team every round",
+    "shadow_dancer": "The shadow dancer has a 25% chance to evade an attack completely. After any dodge, the next attack deals 200% damage",
+    "berserker": "The berserker gains 25% damage for each 25% health lost. When below 25% health, berserker attacks cannot be dodged",
+    "paladin": "The paladin provides a 15% damage reduction aura to all allied fighters in the same column",
+    "crusader": "The crusader becomes more powerful as allies fall. Gains +20% to all stats for each dead ally",
+    "sentinel": "The sentinel protects weakened allies, intercepting all attacks against allies below 25% health",
+    "bastion": "Allies in adjacent position to the bastion gain +50% dodge and 25% damage reduction",
+    "no_class": "No special abilities"
+  },
+
+  "FighterName": {
+    "ASSASSIN": "Assassin",
+    "BRAWLER": "Brawler",
+    "HUNTER": "Hunter",
+    "MAGE": "Mage",
+    "PRIEST": "Priest",
+    "SHADOW_DANCER": "Shadow Dancer",
+    "SHADOWDANCER": "Shadow Dancer",
+    "BERSERKER": "Berserker",
+    "PALADIN": "Paladin",
+    "CRUSADER": "Crusader",
+    "SENTINEL": "Sentinel",
+    "BASTION": "Bastion",
+    "NONE": "No Class",
+    "EMPTY": "Empty",
+    "NO_CLASS": "No Class"
+  },
+
+  "UIElement": {
+    "ADD": "Add",
+    "DELETE": "Delete",
+    "DUPLICATE": "Duplicate",
+
+    "DUPLICATE_NAME": "Duplicate of {0}",
+
+    "DROP_FIGHTER_HERE": "Drop fighters here",
+
+    "TOTAL_WONS": "Fighters won {0} out of {1} battles.",
+
+    "VICTORY_CHANCE": "Victory chance: {0}%",
+    "AVG_SURVIVOR_HEALTH": "Average total health of surviving mobs: {0} hp",
+    "CHANCE_60_MIN": "Probability of winning within the next 60 minutes: {0}%",
+
+    "IMPORTING": "Importing..."
+  },
+
+  "ConsoleMessages": {
+    "SUCC_IMPORT_FIGHTER": "Successfully imported {0} fighters",
+
+    "ERR_FAIL_LOAD_FIGHTER": "Failed to deserialize fighter:",
+    "ERR_FAIL_LOAD_GRID": "Failed to load grid state:",
+    "ERR_FAIL_LOAD_BENCH": "Failed to load bench state:",
+    "ERR_FAIL_CREA_FIGHTER": "Failed to create fighter:",
+    "ERR_IMPORT_FAIL": "Import failed:",
+    "ERR_PROC_IMPORT_DATA": "Error processing imported data: {0}",
+
+    "ERR_IVLD_FIGHTER_DATA": "Invalid fighter data: not an object",
+    "ERR_IVLD_FIGHTER_CLS": "Invalid or missing fighter class",
+    "ERR_IVLD_FIGHTER_CLS_PLH": "{0} is not a valid class. Please check your input.",
+    "ERR_IVLD_API_FORMAT": "Invalid API response format: missing or invalid 'output' array.",
+
+    "INFO_SEARCH_IN_ITEMS": "Searching for dungeon preset in {0} items",
+    "INFO_AVIL_PRESET": "Available presets:",
+    "INFO_NO_AVIL_PRESET": "No preset found with assignment 'dungeon'. Nothing was imported.",
+    "INFO_PRESET_FOUND": "Found dungeon preset: {0} with {1} fighteres",
+    "INFO_PROC_FIGHTER": "Processing fighter: {0} class: {1}"
+  },
+
+  "Alerts": {
+    "ERR_FAIL_CREA_FIGHTER": "Failed to create fighter. Please check your input values.",
+    "ERR_NULL_API": "Please enter an API key before importing.",
+    "ERR_HTTP_ERROR": "HTTP error! status: {0}",
+    "ERR_IMPORT_FAIL": "Import failed: {0}",
+    "SUCC_IMPORT_FIGHTER": "Successfully imported {0} fighters from dungeon preset!"
+  },
+
+  "BattleInfo": {
+    "MOB": "mob",
+    "FIGHTER": "fighter",
+
+    "MOB_ATK_NAME": "level {0} {1}",
+    "MOB_TGT_NAME": "level {0} {1}",
+
+    "HEADERS": ["Mobs Back", "Mobs Front", "Fighters Front", "Fighters Back"],
+
+    "LOSE_DUE_TO_EXHAUST": "Fighters lost the battle due to exhaustion!",
+    "HEALTH_0": "Health reached 0",
+    "HEALTH_TABLE_LINE": "{0} lvl {1}",
+
+    "ROUND_INFO": "Round: {0}, Attack: {1}",
+    "FINAL_ROUND": "Final Round Situation",
+
+    "DAMAGE_INFO": "{0} hits {1} and deals {2} damage.",
+    "ATK_MISS": "{0} misses attacking {1}.",
+    "CRT_RNG_INFO": "Crit rng: {0}} < 0.1",
+    "ATK_CANNOT_DODGE": "{0} attack cannot be dodged",
+    "ATK_RNG_SUCC": "Successful attack rng: {0} < {1}",
+
+    "SP_SD_EVADED": "Shadow dancer has evaded. Next attack will be double damage",
+    "SP_SD_APL_DOUBLEDMG": "Shadow Dancer applies double damage",
+    "SP_BR_DOUBLE": "Brawler attacked twice!",
+    "SP_PL_DMG_REDUCTION": "Paladin aura adds 15% damage reduction",
+    "SP_BS_DMG_DODGE": "Bastion aura adds 25% damage reduction and 50% increased dodge",
+    "PRIEST_RESURRECTED": "Priest resurrected {0} at 10% hp",
+
+    "ERR_IVLD_TGT_ID": "No valid target found for {0} attack",
+    "ERR_IVLD_ATKR": "Invalid attacker",
+    "ERR_IVLD_TGT": "Invalid target"
+  },
+
+  "MobInfo": {
+    "MOB": "Mob",
+    "BOSS": "Boss"
+  }
+}

@@ -1,0 +1,61 @@
+2025-11-17
+- Corrected a bug where Paladin aura would sometimes not apply
+
+2025-11-16
+- Dead fighters are revived by priest to 25% of resurrected fighter total HP. Corrected value from previous 10%
+
+2025-11-14
+- Fixed a bug where crusader attack buff was applied twice. Thanks to all who reported it  
+
+2025-11-01
+- Added color coding in verbose for atatcker and defender characters
+- Corrected Paladin description
+
+2025-10-25
+- Fixed attacker hit chance being capped at 95% 
+
+2025-10-21
+- Fixed item crit import through API 
+
+2025-10-20
+- Fixed imported stats being capped at 20
+
+2025-10-19
+- Fixed priest to resurrect at the end of the round, at only 10 percent of total hp
+- Added probability of winning within next 60 minutes
+
+2025-10-16
+- Polished non verbose battle output text. Included average sum of surviving mobs health. 
+
+2025-10-15
+- Introduced fighters index so dulipcations can be tracked
+- Various graphic fixes
+- Corrected hit chance formula to the correct value
+- Reworked the verbose display (thanks Sakaki Chizuru)
+- Added Chinese localization (all done by Sakaki Chizuru)
+
+2025-10-14
+- Shadow Dancer double damage attack will stay until a successful hit
+
+2025-10-13
+- Released API
+- Changed Shadow Dancer to only deal double damage after evade (not after dodge)
+- Changed "Object" to "Item" and added an info tooltip at Fighter creation
+
+2025-10-12
+- Changed mob squad formation to reflect dungeon better
+
+2025-10-11
+- Added duplicate fighter button
+- Added fighter classes tooltip description
+
+2025-10-10
+- Added steeping difficulty for mobs after dungeon lvl 600
+
+2025-10-09
+- Added API import
+
+2025-10-08
+- Corrected Crusader defense calculation
+- Corrected damage reduction calculation
+- First release

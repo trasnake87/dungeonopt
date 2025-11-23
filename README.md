@@ -1,0 +1,75 @@
+# Queslar Dungeon Optimizer
+
+Stat optimizer for Queslar fighters to maximize win rate against dungeons.
+
+**Battle simulation by [anfneub](https://anfneub.github.io/QueslarDungeonSim/)**
+
+## What It Does
+
+This optimizer reallocates stat points across your 5-fighter dungeon team to maximize win rate. It uses a two-phase approach:
+
+1. **Phase 1**: Find the best stat to add points to (tests all 30 fighter×stat combinations)
+2. **Phase 2**: Find the best stat to remove points from to fund that addition
+
+The optimizer runs millions of battle simulations per test to find statistically significant improvements.
+
+## Features
+
+- **Adaptive test counts**: Full scan on round 1, then top 5→10 for efficiency
+- **Residual gold spending**: Automatically invests accumulated gold when ≥10M
+- **Free gold investment**: Ask user for available gold and recommend best stat allocations
+- **Parallel workers**: Uses 8 threads for fast simulation
+
+## Requirements
+
+- Node.js 18+
+- `node-fetch` package
+
+```bash
+npm install node-fetch
+```
+
+## Configuration
+
+Edit these values in `optimizer3.js`:
+
+```javascript
+const DUNGEON_LEVEL = 650;        // Target dungeon level
+const BATTLES_PER_TEST = 2500000; // More = accurate but slower
+const NUM_WORKERS = 8;            // Parallel threads
+const API_KEY = 'your-api-key';   // Queslar API key
+```
+
+## Usage
+
+```bash
+node optimizer3.js
+```
+
+The optimizer will:
+1. Fetch your current fighter stats from the Queslar API
+2. Ask if you have free gold to invest (optional)
+3. Show recommendations for free gold investment
+4. Run continuous optimization, reallocating gold between stats
+5. Display improvements as they're found
+
+## How Gold/Points Work
+
+Gold cost follows triangular numbers: `(n × (n+1) / 2) × 10,000`
+
+| Gold | Points |
+|------|--------|
+| 20M  | 62 pts |
+| 10M  | 44 pts |
+| 5M   | 31 pts |
+
+## Files
+
+- `optimizer3.js` - Main optimizer with all features
+- `optimizer2.js` - Optimizer without free gold investment feature
+- `optimizer.js` - Original optimizer
+- `dung/` - Battle simulation engine (by anfneub)
+
+## Credits
+
+- Battle simulation: [anfneub's QueslarDungeonSim](https://anfneub.github.io/QueslarDungeonSim/)
